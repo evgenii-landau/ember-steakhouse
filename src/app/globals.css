@@ -1,3 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-ember-black: #0A0806;
+  --color-ember-warm: #1A1210;
+  --color-ember-cream: #F2EDE4;
+  --color-ember-gold: #C8973A;
+  --color-ember-gold-hover: #B07D28;
+  --color-ember-muted: #9A8F85;
+  --color-ember-border: #2A1F1A;
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: #0A0806;
+    color: #ffffff;
+  }
+  * {
+    border-radius: 0 !important;
+  }
+}
