@@ -5,6 +5,9 @@ import MenuHighlights from '@/components/sections/MenuHighlights'
 import Ambiance from '@/components/sections/Ambiance'
 import SpecialEvents from '@/components/sections/SpecialEvents'
 import Reviews from '@/components/sections/Reviews'
+import ReservationForm from '@/components/sections/ReservationForm'
+import Contacts from '@/components/sections/Contacts'
+import Footer from '@/components/sections/Footer'
 
 export default function Page() {
   return (
@@ -16,6 +19,9 @@ export default function Page() {
       <Ambiance />
       <SpecialEvents />
       <Reviews />
+      <ReservationForm />
+      <Contacts />
+      <Footer />
     </main>
   )
 }
