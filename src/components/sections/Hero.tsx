@@ -32,12 +32,6 @@ export default function Hero() {
 
         <Button href="#reservations">Reserve Your Table</Button>
       </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-        <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-white">Scroll</span>
-        <div className="w-px h-12 bg-white/40" />
-      </div>
     </section>
   )
 }

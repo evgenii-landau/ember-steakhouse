@@ -18,11 +18,12 @@ export default function Ambiance() {
           </p>
         </FadeIn>
 
-        {/* Gallery grid */}
+        {/* Gallery grid — 3 rows, fully filled */}
         <div className="grid grid-cols-12 gap-3">
-          {/* Large landscape — spans 8 cols */}
+
+          {/* Row 1: landscape (8) + portrait (4) */}
           <FadeIn className="col-span-12 md:col-span-8">
-            <div className="relative aspect-[16/9] overflow-hidden">
+            <div className="relative h-[400px] overflow-hidden">
               <Image
                 src={AMBIANCE_IMAGES[0].src}
                 alt={AMBIANCE_IMAGES[0].alt}
@@ -32,9 +33,8 @@ export default function Ambiance() {
             </div>
           </FadeIn>
 
-          {/* Portrait — spans 4 cols */}
           <FadeIn className="col-span-12 md:col-span-4" delay={0.1}>
-            <div className="relative aspect-[4/5] overflow-hidden h-full min-h-[240px]">
+            <div className="relative h-[400px] overflow-hidden">
               <Image
                 src={AMBIANCE_IMAGES[1].src}
                 alt={AMBIANCE_IMAGES[1].alt}
@@ -44,10 +44,10 @@ export default function Ambiance() {
             </div>
           </FadeIn>
 
-          {/* Two square images */}
-          {AMBIANCE_IMAGES.slice(2, 4).map((img, i) => (
-            <FadeIn key={i} className="col-span-6 md:col-span-4" delay={i * 0.1}>
-              <div className="relative aspect-[4/3] overflow-hidden">
+          {/* Row 2: three equal squares (4+4+4) */}
+          {AMBIANCE_IMAGES.slice(2, 5).map((img, i) => (
+            <FadeIn key={i} className="col-span-12 md:col-span-4" delay={i * 0.08}>
+              <div className="relative h-[280px] overflow-hidden">
                 <Image
                   src={img.src}
                   alt={img.alt}
@@ -58,17 +58,29 @@ export default function Ambiance() {
             </FadeIn>
           ))}
 
-          {/* Wide landscape */}
-          <FadeIn className="col-span-12 md:col-span-8" delay={0.2}>
-            <div className="relative aspect-[16/9] overflow-hidden">
+          {/* Row 3: portrait (4) + landscape (8) — mirrors row 1 */}
+          <FadeIn className="col-span-12 md:col-span-4" delay={0.08}>
+            <div className="relative h-[400px] overflow-hidden">
               <Image
-                src={AMBIANCE_IMAGES[4].src}
-                alt={AMBIANCE_IMAGES[4].alt}
+                src={AMBIANCE_IMAGES[5].src}
+                alt={AMBIANCE_IMAGES[5].alt}
                 fill
                 className="object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
           </FadeIn>
+
+          <FadeIn className="col-span-12 md:col-span-8" delay={0.16}>
+            <div className="relative h-[400px] overflow-hidden">
+              <Image
+                src={AMBIANCE_IMAGES[6].src}
+                alt={AMBIANCE_IMAGES[6].alt}
+                fill
+                className="object-cover hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </FadeIn>
+
         </div>
 
       </div>

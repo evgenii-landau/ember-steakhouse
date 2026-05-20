@@ -1,7 +1,31 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { useInView } from 'framer-motion'
 import FadeIn from '@/components/ui/FadeIn'
 import SectionEyebrow from '@/components/ui/SectionEyebrow'
 import { STORY_STATS } from '@/lib/content'
+
+function CountUp({ target, from, duration = 1400 }: { target: number; from: number; duration?: number }) {
+  const [value, setValue] = useState(from)
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref, { once: true, margin: '0px 0px -60px 0px' })
+
+  useEffect(() => {
+    if (!inView) return
+    const startTime = performance.now()
+    function tick(now: number) {
+      const progress = Math.min((now - startTime) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setValue(Math.round(from + (target - from) * eased))
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }, [inView, from, target, duration])
+
+  return <span ref={ref}>{value}</span>
+}
 
 export default function Story() {
   return (
@@ -23,17 +47,30 @@ export default function Story() {
             </p>
 
             {/* Stats */}
-            <div className="flex gap-10">
-              {STORY_STATS.map((stat, i) => (
-                <div key={i} className={`${i > 0 ? 'pl-10 border-l border-ember-warm/20' : ''}`}>
-                  <div className="font-display text-[40px] font-bold text-ember-gold leading-none mb-1">
-                    {stat.value}
+            <div className="flex items-center">
+              {STORY_STATS.map((stat, i) => {
+                const numeric = !isNaN(Number(stat.value)) ? Number(stat.value) : null
+                return (
+                  <div key={i} className="flex items-center">
+                    {i > 0 && <div className="w-px h-10 bg-ember-warm/20 mx-10 shrink-0" />}
+                    <div>
+                      <div className="font-display text-[40px] font-bold text-ember-gold leading-none mb-1">
+                        {numeric !== null ? (
+                          <CountUp
+                            target={numeric}
+                            from={numeric > 100 ? numeric - 10 : 0}
+                          />
+                        ) : (
+                          stat.value
+                        )}
+                      </div>
+                      <div className="font-sans text-[11px] uppercase tracking-[0.15em] text-ember-muted">
+                        {stat.label}
+                      </div>
+                    </div>
                   </div>
-                  <div className="font-sans text-[11px] uppercase tracking-[0.15em] text-ember-muted">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </FadeIn>
 

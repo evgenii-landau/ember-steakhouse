@@ -47,11 +47,13 @@ export const STORY_STATS = [
 ]
 
 export const AMBIANCE_IMAGES = [
-  { src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80', alt: 'Dining room', aspect: 'landscape' },
-  { src: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80', alt: 'Bar', aspect: 'portrait' },
-  { src: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=600&q=80', alt: 'Dish detail', aspect: 'portrait' },
-  { src: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80', alt: 'Interior', aspect: 'landscape' },
-  { src: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=600&q=80', alt: 'Guests', aspect: 'portrait' },
+  { src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80', alt: 'Dining room' },
+  { src: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80', alt: 'Bar' },
+  { src: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=600&q=80', alt: 'Dish detail' },
+  { src: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80', alt: 'Interior' },
+  { src: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=600&q=80', alt: 'Guests' },
+  { src: 'https://images.unsplash.com/photo-1428515613728-6b4607e44363?w=600&q=80', alt: 'Fine dining' },
+  { src: 'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=800&q=80', alt: 'Restaurant atmosphere' },
 ]
 
 export const REVIEWS = [

@@ -22,8 +22,8 @@ export default function SpecialEvents() {
             </p>
             <ul className="font-sans text-[15px] text-ember-warm/60 space-y-2 mb-10">
               {['Corporate & client entertainment', 'Birthday & anniversary dinners', 'Wedding rehearsal events', 'Buyouts for up to 120 guests'].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="text-ember-gold mt-1">—</span>
+                <li key={item} className="flex items-center gap-3">
+                  <span className="text-ember-gold shrink-0">—</span>
                   {item}
                 </li>
               ))}
