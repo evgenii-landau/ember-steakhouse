@@ -8,8 +8,14 @@ import Button from '@/components/ui/Button'
 import MenuModal from '@/components/ui/MenuModal'
 import { MENU_ITEMS } from '@/lib/content'
 
-// Double the items for a seamless infinite loop
-const LOOP_ITEMS = [...MENU_ITEMS, ...MENU_ITEMS]
+// Repeat enough copies so a single loop unit (half the track) is wider than
+// the viewport — otherwise the -50%→0% marquee leaves an empty gap on the right.
+const LOOP_ITEMS = [
+  ...MENU_ITEMS,
+  ...MENU_ITEMS,
+  ...MENU_ITEMS,
+  ...MENU_ITEMS,
+]
 
 export default function MenuHighlights() {
   const [isPaused, setIsPaused] = useState(false)
