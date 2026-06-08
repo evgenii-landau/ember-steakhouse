@@ -5,6 +5,7 @@ import Image from 'next/image'
 import FadeIn from '@/components/ui/FadeIn'
 import SectionEyebrow from '@/components/ui/SectionEyebrow'
 import Button from '@/components/ui/Button'
+import MenuModal from '@/components/ui/MenuModal'
 import { MENU_ITEMS } from '@/lib/content'
 
 // Double the items for a seamless infinite loop
@@ -12,6 +13,7 @@ const LOOP_ITEMS = [...MENU_ITEMS, ...MENU_ITEMS]
 
 export default function MenuHighlights() {
   const [isPaused, setIsPaused] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <section id="menu" className="bg-ember-black py-24 md:py-32">
@@ -99,9 +101,13 @@ export default function MenuHighlights() {
       {/* Button */}
       <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-20">
         <FadeIn className="text-center mt-14">
-          <Button variant="outline">View Full Menu</Button>
+          <Button variant="outline" onClick={() => setMenuOpen(true)}>
+            View Full Menu
+          </Button>
         </FadeIn>
       </div>
+
+      <MenuModal open={menuOpen} onClose={() => setMenuOpen(false)} />
 
     </section>
   )
