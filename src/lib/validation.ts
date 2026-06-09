@@ -1,43 +1,49 @@
-export interface ReservationFields {
-  name: string
-  email: string
-  phone: string
-  date: string
-  time: string
-  guests: string
-  requests: string
+import { z } from 'zod'
+
+export const MAX_DAYS_AHEAD = 90
+export const MAX_GUESTS = 10
+
+// Latin letters, separated by single spaces or hyphens (no digits / specials)
+const NAME_PATTERN = /^[A-Za-z]+(?:[\s-][A-Za-z]+)*$/
+const PHONE_PATTERN = /^\+1 \(\d{3}\) \d{3}-\d{4}$/
+
+function startOfToday(): Date {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
 }
 
-export type ValidationErrors = Partial<Record<keyof ReservationFields, string>>
-
-export function validateReservationForm(fields: ReservationFields): ValidationErrors {
-  const errors: ValidationErrors = {}
-
-  if (!fields.name.trim()) {
-    errors.name = 'Name is required'
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
-    errors.email = 'Valid email is required'
-  }
-
-  const digits = fields.phone.replace(/\D/g, '')
-  if (digits.length < 10) {
-    errors.phone = 'Valid phone number is required'
-  }
-
-  if (!fields.date) {
-    errors.date = 'Date is required'
-  }
-
-  if (!fields.time) {
-    errors.time = 'Time is required'
-  }
-
-  const guestCount = parseInt(fields.guests, 10)
-  if (isNaN(guestCount) || guestCount < 1 || guestCount > 20) {
-    errors.guests = 'Guests must be between 1 and 20'
-  }
-
-  return errors
+function isWithinBookingWindow(value: string): boolean {
+  const [y, m, d] = value.split('-').map(Number)
+  if (!y || !m || !d) return false
+  const picked = new Date(y, m - 1, d)
+  picked.setHours(0, 0, 0, 0)
+  const today = startOfToday()
+  const max = startOfToday()
+  max.setDate(max.getDate() + MAX_DAYS_AHEAD)
+  return picked >= today && picked <= max
 }
+
+export const reservationSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name is required')
+    .regex(NAME_PATTERN, 'Use Latin letters and hyphens only')
+    .refine((v) => v.split(/\s+/).filter(Boolean).length >= 2, 'Enter first and last name'),
+  email: z.string().min(1, 'Email is required').pipe(z.email('Enter a valid email')),
+  phone: z.string().regex(PHONE_PATTERN, 'Enter a complete phone number'),
+  guests: z
+    .number()
+    .int()
+    .min(1, 'At least 1 guest')
+    .max(MAX_GUESTS, `Up to ${MAX_GUESTS} guests`),
+  date: z
+    .string()
+    .min(1, 'Date is required')
+    .refine(isWithinBookingWindow, 'Choose a date within the next 90 days'),
+  time: z.string().min(1, 'Time is required'),
+  requests: z.string().max(300, 'Maximum 300 characters'),
+})
+
+export type ReservationFormValues = z.infer<typeof reservationSchema>
