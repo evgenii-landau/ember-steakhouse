@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ember Steakhouse
 
-## Getting Started
+Marketing site for Ember, a fire-driven steakhouse — a single scrollable landing page with the menu, gallery, reservations, and contact details.
 
-First, run the development server:
+## Tech stack
+
+- **Next.js** (App Router) + **React**
+- **TypeScript** (strict)
+- **Tailwind CSS v4**
+- **Framer Motion** for scroll-triggered animation
+- **React Hook Form** + **Zod** for the reservation form
+- **react-pageflip** for the book-style full menu
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run the Vitest unit tests |
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/                 App Router entry (layout, page, global styles)
+  components/
+    sections/          One file per page section (Hero, Menu, Story, …)
+    ui/                Reusable UI (Button, MenuModal, Calendar, …)
+  lib/                 Content data, full menu, form validation
+public/                Dish and gallery imagery
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All sections are composed in `src/app/page.tsx`. Editable site copy and data
+live in `src/lib/content.ts` and `src/lib/menu.ts`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Hosted on [Vercel](https://vercel.com). Pushing to `main` triggers an
+automatic production deploy.
