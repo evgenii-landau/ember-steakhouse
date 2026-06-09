@@ -47,14 +47,14 @@ export default function Story() {
             </p>
 
             {/* Stats */}
-            <div className="flex items-center">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-6">
               {STORY_STATS.map((stat, i) => {
                 const numeric = !isNaN(Number(stat.value)) ? Number(stat.value) : null
                 return (
-                  <div key={i} className="flex items-center">
-                    {i > 0 && <div className="w-px h-10 bg-ember-warm/20 mx-10 shrink-0" />}
+                  <div key={i} className="flex items-center gap-x-8 sm:gap-x-10">
+                    {i > 0 && <div className="hidden h-10 w-px shrink-0 bg-ember-warm/20 sm:block" />}
                     <div>
-                      <div className="font-display text-[40px] font-bold text-ember-gold leading-none mb-1">
+                      <div className="font-display text-[34px] sm:text-[40px] font-bold text-ember-gold leading-none mb-1">
                         {numeric !== null ? (
                           <CountUp
                             target={numeric}

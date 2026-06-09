@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import FadeIn from '@/components/ui/FadeIn'
 import SectionEyebrow from '@/components/ui/SectionEyebrow'
@@ -8,13 +8,86 @@ import Button from '@/components/ui/Button'
 import { useMenuBook } from '@/components/ui/MenuBookProvider'
 import { MENU_ITEMS } from '@/lib/content'
 
-// Doubled for a seamless -50%→0% marquee loop. With 10 items a single copy
-// already exceeds the viewport, so two copies are enough to avoid an empty gap.
+// Doubled so the track can loop seamlessly: when scroll passes the first copy
+// we wrap back by exactly its width, which is invisible since the second copy
+// is identical. Two copies are enough — one already exceeds the viewport.
 const LOOP_ITEMS = [...MENU_ITEMS, ...MENU_ITEMS]
 
 export default function MenuHighlights() {
-  const [isPaused, setIsPaused] = useState(false)
   const { openMenu } = useMenuBook()
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  // Refs (not state) so the animation loop reads live values without re-rendering.
+  const pausedRef = useRef(false)
+  const drag = useRef({ active: false, startX: 0, startScroll: 0 })
+
+  // Continuous auto-scroll via scrollLeft. Manual drag (mouse) and native swipe
+  // (touch) move the same scrollLeft, so they compose with the auto-scroll.
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    const track = trackRef.current
+    if (!scroller || !track) return
+
+    // Left edge of the first card of the duplicate copy — the exact loop period.
+    const loopWidth = () => {
+      const dup = track.children[MENU_ITEMS.length] as HTMLElement | undefined
+      return dup ? dup.offsetLeft : track.scrollWidth / 2
+    }
+
+    // Keep scrollLeft inside [0, P) so the loop is seamless and dragging never
+    // hits the native scroll clamp at 0.
+    const wrap = () => {
+      const p = loopWidth()
+      if (p <= 0) return
+      if (scroller.scrollLeft >= p) scroller.scrollLeft -= p
+      else if (scroller.scrollLeft < 0) scroller.scrollLeft += p
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // Match the previous marquee cadence: one full copy over n * 5.5s.
+    const speedPerMs = loopWidth() / (MENU_ITEMS.length * 5500)
+    let raf = 0
+    let last = performance.now()
+
+    const tick = (now: number) => {
+      const dt = now - last
+      last = now
+      if (!reduceMotion && !pausedRef.current && !drag.current.active) {
+        scroller.scrollLeft += speedPerMs * dt
+      }
+      wrap()
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Touch swipe is handled natively by the scroll container; only drive mouse.
+    if (e.pointerType !== 'mouse') return
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    drag.current = { active: true, startX: e.clientX, startScroll: scroller.scrollLeft }
+    scroller.setPointerCapture(e.pointerId)
+  }
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!drag.current.active) return
+    const scroller = scrollerRef.current
+    const track = trackRef.current
+    if (!scroller || !track) return
+    const dup = track.children[MENU_ITEMS.length] as HTMLElement | undefined
+    const p = dup ? dup.offsetLeft : track.scrollWidth / 2
+    let target = drag.current.startScroll - (e.clientX - drag.current.startX)
+    // Shift the anchor alongside the wrap so dragging stays continuous both ways.
+    while (p > 0 && target < 0) { target += p; drag.current.startScroll += p }
+    while (p > 0 && target >= p) { target -= p; drag.current.startScroll -= p }
+    scroller.scrollLeft = target
+  }
+
+  const endDrag = () => {
+    drag.current.active = false
+  }
 
   return (
     <section id="menu" className="bg-ember-black py-24 md:py-32">
@@ -30,29 +103,31 @@ export default function MenuHighlights() {
       </div>
 
       {/* Carousel — full-bleed, outside the content container */}
-      <div
-        className="relative overflow-hidden"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
+      <div className="relative">
         {/* Left fade to ember-black */}
         <div
           className="absolute left-0 top-0 h-full w-28 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to right, #0A0806, transparent)' }}
         />
 
-        {/* Scrolling track */}
+        {/* Scrollable track: auto-scrolls, drag with mouse, swipe on touch */}
         <div
-          className="flex gap-5 w-fit"
-          style={{
-            animation: `marqueeScroll ${MENU_ITEMS.length * 5500}ms linear infinite`,
-            animationPlayState: isPaused ? 'paused' : 'running',
-          }}
+          ref={scrollerRef}
+          className="no-scrollbar overflow-x-auto cursor-grab select-none active:cursor-grabbing"
+          onPointerEnter={(e) => { if (e.pointerType === 'mouse') pausedRef.current = true }}
+          onPointerLeave={(e) => { if (e.pointerType === 'mouse') pausedRef.current = false }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onTouchStart={() => { pausedRef.current = true }}
+          onTouchEnd={() => { pausedRef.current = false }}
         >
+          <div ref={trackRef} className="flex gap-5 w-max">
           {LOOP_ITEMS.map((item, i) => (
             <div
               key={i}
-              className="relative w-[300px] h-[400px] shrink-0 overflow-hidden group cursor-default"
+              className="relative w-[300px] h-[400px] shrink-0 overflow-hidden group"
             >
               {/* Dish image — zooms under hover blur */}
               <Image
@@ -60,6 +135,7 @@ export default function MenuHighlights() {
                 alt={item.name}
                 fill
                 sizes="300px"
+                draggable={false}
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
 
@@ -90,6 +166,7 @@ export default function MenuHighlights() {
               </div>
             </div>
           ))}
+          </div>
         </div>
 
         {/* Right fade to ember-black */}
