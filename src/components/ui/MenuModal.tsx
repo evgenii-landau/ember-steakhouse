@@ -5,6 +5,7 @@ import HTMLFlipBook from 'react-pageflip'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FULL_MENU } from '@/lib/menu'
 import MenuPage from '@/components/ui/MenuPage'
+import CoverPage from '@/components/ui/CoverPage'
 
 interface MenuModalProps {
   open: boolean
@@ -30,12 +31,12 @@ const FLIP_SETTINGS = {
   minHeight: 400,
   maxHeight: 640,
   drawShadow: true,
-  flippingTime: 700,
+  flippingTime: 750,
   usePortrait: true,
   startZIndex: 0,
   autoSize: true,
-  maxShadowOpacity: 0.5,
-  showCover: false,
+  maxShadowOpacity: 0.6,
+  showCover: true,
   mobileScrollSupport: true,
   clickEventForward: true,
   useMouseEvents: true,
@@ -44,9 +45,20 @@ const FLIP_SETTINGS = {
   disableFlipByClick: false,
 } as const
 
+function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d={direction === 'left' ? 'M10 2L4 8L10 14' : 'M6 2L12 8L6 14'}
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+    </svg>
+  )
+}
+
 export default function MenuModal({ open, onClose }: MenuModalProps) {
   const [mounted, setMounted] = useState(false)
-  const [page, setPage] = useState(0)
 
   const bookRef = useRef<FlipBookRef | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -65,6 +77,14 @@ export default function MenuModal({ open, onClose }: MenuModalProps) {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
+        return
+      }
+      if (e.key === 'ArrowLeft') {
+        bookRef.current?.pageFlip().flipPrev()
+        return
+      }
+      if (e.key === 'ArrowRight') {
+        bookRef.current?.pageFlip().flipNext()
         return
       }
       if (e.key !== 'Tab' || !dialogRef.current) return
@@ -91,111 +111,114 @@ export default function MenuModal({ open, onClose }: MenuModalProps) {
     }
   }, [open, onClose])
 
-  const currentSection = FULL_MENU[page]?.section ?? ''
+  const flipPrev = () => bookRef.current?.pageFlip().flipPrev()
+  const flipNext = () => bookRef.current?.pageFlip().flipNext()
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Backdrop */}
+          {/* Blurred backdrop */}
           <div
-            className="absolute inset-0 bg-ember-black/80"
-            style={{ backdropFilter: 'blur(8px)' }}
+            className="absolute inset-0 bg-ember-black/75"
+            style={{ backdropFilter: 'blur(10px)' }}
             onClick={onClose}
             aria-hidden
           />
 
-          {/* Dialog */}
+          {/* Floating close */}
+          <button
+            ref={closeBtnRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="absolute right-6 top-6 z-20 p-2 text-ember-cream/60 transition-colors hover:text-ember-gold md:right-10 md:top-10"
+          >
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" strokeWidth="1.25" />
+            </svg>
+          </button>
+
+          {/* Frameless book floating over the backdrop */}
           <motion.div
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Full menu"
-            className="relative z-10 flex max-h-[92vh] w-full max-w-[1000px] flex-col border border-ember-border bg-ember-warm"
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            className="relative z-10 w-full max-w-[940px]"
+            initial={{ opacity: 0, y: 20, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
+            exit={{ opacity: 0, y: 20, scale: 0.97 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >
-            {/* Header */}
-            <header className="flex items-center justify-between border-b border-ember-border px-6 py-5 md:px-8">
-              <div>
-                <span className="block font-sans text-[10px] uppercase tracking-[0.3em] text-ember-gold">
-                  Ember Steakhouse
-                </span>
-                <h2 className="font-display text-[26px] font-bold leading-tight text-white">
-                  The Full Menu
-                </h2>
-              </div>
+            {/* Side arrows (desktop) */}
+            <button
+              type="button"
+              onClick={flipPrev}
+              aria-label="Previous page"
+              className="absolute -left-12 top-1/2 z-20 hidden -translate-y-1/2 p-2 text-ember-cream/50 transition-colors hover:text-ember-gold md:block"
+            >
+              <ChevronIcon direction="left" />
+            </button>
+            <button
+              type="button"
+              onClick={flipNext}
+              aria-label="Next page"
+              className="absolute -right-12 top-1/2 z-20 hidden -translate-y-1/2 p-2 text-ember-cream/50 transition-colors hover:text-ember-gold md:block"
+            >
+              <ChevronIcon direction="right" />
+            </button>
 
-              <button
-                ref={closeBtnRef}
-                type="button"
-                onClick={onClose}
-                aria-label="Close menu"
-                className="border border-ember-border p-2 text-ember-muted transition-colors hover:text-white"
+            {mounted && (
+              <HTMLFlipBook
+                ref={bookRef}
+                {...FLIP_SETTINGS}
+                renderOnlyPageLengthChange
+                className="mx-auto"
+                style={{}}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-                  <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
+                <CoverPage variant="front" />
+                {FULL_MENU.map((section, i) => (
+                  <MenuPage
+                    key={section.section}
+                    section={section}
+                    dense
+                    pageNumber={i + 1}
+                    side={i % 2 === 0 ? 'left' : 'right'}
+                  />
+                ))}
+                <CoverPage variant="back" />
+              </HTMLFlipBook>
+            )}
+
+            {/* Arrows (mobile) + hint */}
+            <div className="mt-7 flex items-center justify-center gap-10 md:hidden">
+              <button
+                type="button"
+                onClick={flipPrev}
+                aria-label="Previous page"
+                className="p-2 text-ember-cream/50 transition-colors hover:text-ember-gold"
+              >
+                <ChevronIcon direction="left" />
               </button>
-            </header>
-
-            {/* Body */}
-            <div className="relative flex-1 overflow-y-auto bg-ember-black px-4 py-8 md:px-10 md:py-12">
-              <div className="mx-auto w-full max-w-[940px]">
-                {mounted && (
-                  <HTMLFlipBook
-                    ref={bookRef}
-                    {...FLIP_SETTINGS}
-                    renderOnlyPageLengthChange
-                    className="mx-auto"
-                    style={{}}
-                    onFlip={(e: { data: number }) => setPage(e.data)}
-                  >
-                    {FULL_MENU.map((section, i) => (
-                      <MenuPage key={section.section} section={section} dense pageNumber={i + 1} />
-                    ))}
-                  </HTMLFlipBook>
-                )}
-
-                {/* Book navigation */}
-                <div className="mt-8 flex items-center justify-center gap-8">
-                  <button
-                    type="button"
-                    onClick={() => bookRef.current?.pageFlip().flipPrev()}
-                    aria-label="Previous page"
-                    className="border border-ember-border p-3 text-ember-muted transition-colors hover:border-ember-gold hover:text-ember-gold"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-                      <path d="M10 2L4 8L10 14" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
-                  </button>
-                  <span className="min-w-[120px] text-center font-sans text-[11px] uppercase tracking-[0.2em] text-ember-muted">
-                    {currentSection}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => bookRef.current?.pageFlip().flipNext()}
-                    aria-label="Next page"
-                    className="border border-ember-border p-3 text-ember-muted transition-colors hover:border-ember-gold hover:text-ember-gold"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-                      <path d="M6 2L12 8L6 14" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
-                  </button>
-                </div>
-                <p className="mt-4 text-center font-sans text-[10px] tracking-[0.15em] text-ember-muted/60">
-                  Drag a corner or use the arrows to turn the page
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={flipNext}
+                aria-label="Next page"
+                className="p-2 text-ember-cream/50 transition-colors hover:text-ember-gold"
+              >
+                <ChevronIcon direction="right" />
+              </button>
             </div>
+            <p className="mt-5 text-center font-sans text-[10px] tracking-[0.18em] text-ember-cream/35">
+              Drag a corner or use the arrows to turn the page
+            </p>
           </motion.div>
         </motion.div>
       )}

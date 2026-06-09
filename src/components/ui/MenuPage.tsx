@@ -5,16 +5,31 @@ interface MenuPageProps {
   section: MenuSection
   dense?: boolean
   pageNumber: number
+  side?: 'left' | 'right'
 }
 
 const MenuPage = forwardRef<HTMLDivElement, MenuPageProps>(function MenuPage(
-  { section, dense = false, pageNumber },
+  { section, dense = false, pageNumber, side = 'right' },
   ref,
 ) {
   return (
-    <div ref={ref} className="bg-ember-cream h-full w-full overflow-hidden">
+    <div ref={ref} className="menu-paper relative h-full w-full overflow-hidden">
+      {/* Soft inner shadow along the binding to fake paper depth at the fold */}
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute inset-y-0 z-10 w-14 ${
+          side === 'left' ? 'right-0' : 'left-0'
+        }`}
+        style={{
+          background:
+            side === 'left'
+              ? 'linear-gradient(to left, rgba(20,14,10,0.16), transparent)'
+              : 'linear-gradient(to right, rgba(20,14,10,0.16), transparent)',
+        }}
+      />
+
       <div
-        className={`flex h-full flex-col ${
+        className={`relative z-0 flex h-full flex-col ${
           dense ? 'px-7 py-9' : 'px-9 py-11 md:px-12 md:py-14'
         }`}
       >
