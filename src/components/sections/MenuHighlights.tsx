@@ -227,7 +227,8 @@ function MobileSlider() {
       >
         {MENU_ITEMS.map((item) => (
           <div key={item.id} className="w-full shrink-0 snap-center">
-            <article className="relative h-[56svh] max-h-[460px] min-h-[330px] w-full overflow-hidden">
+            {/* Photo — fully visible, nothing on top of it but the category badge */}
+            <div className="relative h-[44svh] max-h-[400px] min-h-[260px] w-full overflow-hidden">
               <Image
                 src={item.image}
                 alt={item.name}
@@ -236,33 +237,25 @@ function MobileSlider() {
                 draggable={false}
                 className="object-cover"
               />
-
-              {/* Category badge */}
               <div className="absolute top-4 right-4 z-20 bg-ember-gold px-2 py-1 flex items-center justify-center">
                 <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-ember-black font-medium leading-none">
                   {item.category}
                 </span>
               </div>
+            </div>
 
-              {/* Info on a translucent, frosted backing for readability */}
-              <div
-                className="absolute inset-x-0 bottom-0 z-10 p-5 pt-16"
-                style={{
-                  backdropFilter: 'blur(2px)',
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.88) 15%, rgba(0,0,0,0.55) 55%, transparent)',
-                }}
-              >
-                <h3 className="font-display text-[24px] font-semibold text-white leading-tight mb-1.5">
-                  {item.name}
-                </h3>
-                <p className="font-sans text-[13px] text-white/80 leading-relaxed mb-3 line-clamp-3">
-                  {item.description}
-                </p>
-                <span className="font-sans text-[20px] text-ember-gold font-medium">
-                  {item.price}
-                </span>
-              </div>
-            </article>
+            {/* Info — below the photo, on the section's dark background */}
+            <div className="pt-5">
+              <h3 className="font-display text-[24px] font-semibold text-white leading-tight mb-1.5">
+                {item.name}
+              </h3>
+              <p className="font-sans text-[14px] text-white/70 leading-relaxed mb-3">
+                {item.description}
+              </p>
+              <span className="font-sans text-[20px] text-ember-gold font-medium">
+                {item.price}
+              </span>
+            </div>
           </div>
         ))}
       </div>
