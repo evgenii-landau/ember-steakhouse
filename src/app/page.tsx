@@ -1,3 +1,4 @@
+import { MenuBookProvider } from '@/components/ui/MenuBookProvider'
 import Navbar from '@/components/sections/Navbar'
 import Hero from '@/components/sections/Hero'
 import Story from '@/components/sections/Story'
@@ -11,17 +12,19 @@ import Footer from '@/components/sections/Footer'
 
 export default function Page() {
   return (
-    <main>
-      <Navbar />
-      <Hero />
-      <Story />
-      <MenuHighlights />
-      <Ambiance />
-      <SpecialEvents />
-      <Reviews />
-      <ReservationForm />
-      <Contacts />
-      <Footer />
-    </main>
+    <MenuBookProvider>
+      <main>
+        <Navbar />
+        <Hero />
+        <Story />
+        <MenuHighlights />
+        <Ambiance />
+        <SpecialEvents />
+        <Reviews />
+        <ReservationForm />
+        <Contacts />
+        <Footer />
+      </main>
+    </MenuBookProvider>
   )
 }

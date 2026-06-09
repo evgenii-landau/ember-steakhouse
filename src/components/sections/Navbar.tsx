@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
+import { useMenuBook } from '@/components/ui/MenuBookProvider'
 import { NAV_LINKS } from '@/lib/content'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const { openMenu } = useMenuBook()
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 80)
@@ -32,23 +34,27 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-10">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="font-sans text-xs uppercase tracking-[0.15em] text-white/80 hover:text-ember-gold transition-colors duration-200"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.label === 'Menu' ? (
+              <button
+                key={link.href}
+                type="button"
+                onClick={openMenu}
+                className="font-sans text-xs uppercase tracking-[0.15em] text-white/80 hover:text-ember-gold transition-colors duration-200 cursor-pointer"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="font-sans text-xs uppercase tracking-[0.15em] text-white/80 hover:text-ember-gold transition-colors duration-200"
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
-
-        {/* CTA */}
-        <div className="hidden md:block">
-          <Button variant="outline" href="#reservations">
-            Reserve a Table
-          </Button>
-        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -65,17 +71,31 @@ export default function Navbar() {
       {/* Mobile menu overlay */}
       {menuOpen && (
         <div className="md:hidden bg-ember-black/98 absolute top-20 left-0 right-0 px-6 py-10 flex flex-col gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="font-sans text-sm uppercase tracking-[0.2em] text-white hover:text-ember-gold transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Button variant="outline" href="#reservations">
+          {NAV_LINKS.map((link) =>
+            link.label === 'Menu' ? (
+              <button
+                key={link.href}
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false)
+                  openMenu()
+                }}
+                className="text-left font-sans text-sm uppercase tracking-[0.2em] text-white hover:text-ember-gold transition-colors"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="font-sans text-sm uppercase tracking-[0.2em] text-white hover:text-ember-gold transition-colors"
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
+          <Button variant="outline" href="#reservations" onClick={() => setMenuOpen(false)}>
             Reserve a Table
           </Button>
         </div>
