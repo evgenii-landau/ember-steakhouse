@@ -8,14 +8,9 @@ import Button from '@/components/ui/Button'
 import { useMenuBook } from '@/components/ui/MenuBookProvider'
 import { MENU_ITEMS } from '@/lib/content'
 
-// Repeat enough copies so a single loop unit (half the track) is wider than
-// the viewport — otherwise the -50%→0% marquee leaves an empty gap on the right.
-const LOOP_ITEMS = [
-  ...MENU_ITEMS,
-  ...MENU_ITEMS,
-  ...MENU_ITEMS,
-  ...MENU_ITEMS,
-]
+// Doubled for a seamless -50%→0% marquee loop. With 10 items a single copy
+// already exceeds the viewport, so two copies are enough to avoid an empty gap.
+const LOOP_ITEMS = [...MENU_ITEMS, ...MENU_ITEMS]
 
 export default function MenuHighlights() {
   const [isPaused, setIsPaused] = useState(false)
