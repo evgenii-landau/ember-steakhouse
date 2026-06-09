@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import FadeIn from '@/components/ui/FadeIn'
 import SectionEyebrow from '@/components/ui/SectionEyebrow'
@@ -8,13 +8,47 @@ import Button from '@/components/ui/Button'
 import { useMenuBook } from '@/components/ui/MenuBookProvider'
 import { MENU_ITEMS } from '@/lib/content'
 
+export default function MenuHighlights() {
+  const { openMenu } = useMenuBook()
+
+  return (
+    <section id="menu" className="bg-ember-black py-16 md:py-32">
+
+      {/* Heading */}
+      <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-20">
+        <FadeIn className="text-center mb-10 md:mb-16">
+          <SectionEyebrow>What We Serve</SectionEyebrow>
+          <h2 className="font-display text-[clamp(32px,5vw,56px)] font-bold text-white">
+            Signature Dishes
+          </h2>
+        </FadeIn>
+      </div>
+
+      {/* Desktop: full-bleed auto-scrolling, draggable marquee */}
+      <DesktopMarquee />
+
+      {/* Mobile: one dish at a time, swipe + pagination dots */}
+      <MobileSlider />
+
+      {/* Button — opens the same full menu modal as the navbar */}
+      <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-20">
+        <FadeIn className="text-center mt-8 md:mt-14">
+          <Button variant="outline" onClick={openMenu}>
+            View Full Menu
+          </Button>
+        </FadeIn>
+      </div>
+
+    </section>
+  )
+}
+
 // Doubled so the track can loop seamlessly: when scroll passes the first copy
 // we wrap back by exactly its width, which is invisible since the second copy
 // is identical. Two copies are enough — one already exceeds the viewport.
 const LOOP_ITEMS = [...MENU_ITEMS, ...MENU_ITEMS]
 
-export default function MenuHighlights() {
-  const { openMenu } = useMenuBook()
+function DesktopMarquee() {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   // Refs (not state) so the animation loop reads live values without re-rendering.
@@ -44,18 +78,19 @@ export default function MenuHighlights() {
     }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    // Match the previous marquee cadence: one full copy over n * 5.5s.
-    const speedPerMs = loopWidth() / (MENU_ITEMS.length * 5500)
     let raf = 0
     let last = performance.now()
 
     const tick = (now: number) => {
       const dt = now - last
       last = now
-      if (!reduceMotion && !pausedRef.current && !drag.current.active) {
+      // offsetParent is null while hidden at the mobile breakpoint — skip work.
+      if (scroller.offsetParent !== null && !reduceMotion && !pausedRef.current && !drag.current.active) {
+        // Match the previous marquee cadence: one full copy over n * 5.5s.
+        const speedPerMs = loopWidth() / (MENU_ITEMS.length * 5500)
         scroller.scrollLeft += speedPerMs * dt
+        wrap()
       }
-      wrap()
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
@@ -90,40 +125,27 @@ export default function MenuHighlights() {
   }
 
   return (
-    <section id="menu" className="bg-ember-black py-24 md:py-32">
+    <div className="relative hidden md:block">
+      {/* Left fade to ember-black */}
+      <div
+        className="absolute left-0 top-0 h-full w-28 z-10 pointer-events-none"
+        style={{ background: 'linear-gradient(to right, #0A0806, transparent)' }}
+      />
 
-      {/* Heading */}
-      <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-20">
-        <FadeIn className="text-center mb-16">
-          <SectionEyebrow>What We Serve</SectionEyebrow>
-          <h2 className="font-display text-[clamp(36px,5vw,56px)] font-bold text-white">
-            Signature Dishes
-          </h2>
-        </FadeIn>
-      </div>
-
-      {/* Carousel — full-bleed, outside the content container */}
-      <div className="relative">
-        {/* Left fade to ember-black */}
-        <div
-          className="absolute left-0 top-0 h-full w-28 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, #0A0806, transparent)' }}
-        />
-
-        {/* Scrollable track: auto-scrolls, drag with mouse, swipe on touch */}
-        <div
-          ref={scrollerRef}
-          className="no-scrollbar overflow-x-auto cursor-grab select-none active:cursor-grabbing"
-          onPointerEnter={(e) => { if (e.pointerType === 'mouse') pausedRef.current = true }}
-          onPointerLeave={(e) => { if (e.pointerType === 'mouse') pausedRef.current = false }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          onTouchStart={() => { pausedRef.current = true }}
-          onTouchEnd={() => { pausedRef.current = false }}
-        >
-          <div ref={trackRef} className="flex gap-5 w-max">
+      {/* Scrollable track: auto-scrolls, drag with mouse, swipe on touch */}
+      <div
+        ref={scrollerRef}
+        className="no-scrollbar overflow-x-auto cursor-grab select-none active:cursor-grabbing"
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse') pausedRef.current = true }}
+        onPointerLeave={(e) => { if (e.pointerType === 'mouse') pausedRef.current = false }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onTouchStart={() => { pausedRef.current = true }}
+        onTouchEnd={() => { pausedRef.current = false }}
+      >
+        <div ref={trackRef} className="flex gap-5 w-max">
           {LOOP_ITEMS.map((item, i) => (
             <div
               key={i}
@@ -166,25 +188,104 @@ export default function MenuHighlights() {
               </div>
             </div>
           ))}
-          </div>
         </div>
-
-        {/* Right fade to ember-black */}
-        <div
-          className="absolute right-0 top-0 h-full w-28 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to left, #0A0806, transparent)' }}
-        />
       </div>
 
-      {/* Button */}
-      <div className="max-w-screen-xl mx-auto px-6 md:px-12 lg:px-20">
-        <FadeIn className="text-center mt-14">
-          <Button variant="outline" onClick={openMenu}>
-            View Full Menu
-          </Button>
-        </FadeIn>
+      {/* Right fade to ember-black */}
+      <div
+        className="absolute right-0 top-0 h-full w-28 z-10 pointer-events-none"
+        style={{ background: 'linear-gradient(to left, #0A0806, transparent)' }}
+      />
+    </div>
+  )
+}
+
+function MobileSlider() {
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+
+  // Active dot follows the snapped slide; width === one slide so index is exact.
+  const onScroll = () => {
+    const s = scrollerRef.current
+    if (!s) return
+    const i = Math.round(s.scrollLeft / s.clientWidth)
+    setActive((prev) => (prev === i ? prev : i))
+  }
+
+  const goTo = (i: number) => {
+    const s = scrollerRef.current
+    if (!s) return
+    s.scrollTo({ left: i * s.clientWidth, behavior: 'smooth' })
+  }
+
+  return (
+    <div className="md:hidden px-6">
+      <div
+        ref={scrollerRef}
+        onScroll={onScroll}
+        className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
+      >
+        {MENU_ITEMS.map((item) => (
+          <div key={item.id} className="w-full shrink-0 snap-center">
+            <article className="relative h-[56svh] max-h-[460px] min-h-[330px] w-full overflow-hidden">
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                sizes="100vw"
+                draggable={false}
+                className="object-cover"
+              />
+
+              {/* Category badge */}
+              <div className="absolute top-4 right-4 z-20 bg-ember-gold px-2 py-1 flex items-center justify-center">
+                <span className="font-sans text-[10px] uppercase tracking-[0.15em] text-ember-black font-medium leading-none">
+                  {item.category}
+                </span>
+              </div>
+
+              {/* Info on a translucent, frosted backing for readability */}
+              <div
+                className="absolute inset-x-0 bottom-0 z-10 p-5 pt-16"
+                style={{
+                  backdropFilter: 'blur(2px)',
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.88) 15%, rgba(0,0,0,0.55) 55%, transparent)',
+                }}
+              >
+                <h3 className="font-display text-[24px] font-semibold text-white leading-tight mb-1.5">
+                  {item.name}
+                </h3>
+                <p className="font-sans text-[13px] text-white/80 leading-relaxed mb-3 line-clamp-3">
+                  {item.description}
+                </p>
+                <span className="font-sans text-[20px] text-ember-gold font-medium">
+                  {item.price}
+                </span>
+              </div>
+            </article>
+          </div>
+        ))}
       </div>
 
-    </section>
+      {/* Pagination dots */}
+      <div className="mt-6 flex items-center justify-center gap-2.5">
+        {MENU_ITEMS.map((item, i) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => goTo(i)}
+            aria-label={`Show ${item.name}`}
+            aria-current={active === i ? 'true' : undefined}
+            className="group p-2"
+          >
+            <span
+              className={`block h-1.5 transition-all duration-300 ${
+                active === i ? 'w-6 bg-ember-gold' : 'w-1.5 bg-white/30 group-hover:bg-white/50'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
